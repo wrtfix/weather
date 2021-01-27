@@ -25,7 +25,9 @@ public class WeatherServiceImpl implements IWeatherService{
 
 	@Override
 	public boolean saveWeather(Weather weather) {
-		if (!repo.exists(Example.of(weather))) {
+		Weather value = new Weather();
+		value.setId(weather.getId());
+		if (!repo.exists(Example.of(value))) {
 			repo.save(weather);
 			return true;
 		}
