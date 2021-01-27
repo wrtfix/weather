@@ -15,7 +15,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.globant.model.Weather;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.globant.domain.Weather;
 import com.globant.services.IWeatherService;
 
 @RestController
@@ -25,15 +27,25 @@ public class WeatherApi {
 	@Autowired
 	private IWeatherService service;
 	
+	@Autowired
+	ObjectMapper mapper;
+	
 	private static final Logger LOG = LoggerFactory.getLogger(WeatherApi.class);
 	private static final String NO_FOUND = "Its not posible to do the operation";
 	private static final String ACCEPTED = "The weather was save successfully";
 	private static final String DELETE = "The data was deleted successfully";
 	
 	@PostMapping (value ="/weather") 
-	public ResponseEntity saveWeather(@RequestBody Weather weather) {
+	public ResponseEntity saveWeather(@RequestBody Weather weather) throws JsonProcessingException {
 		LOG.info("Save new weather");
-		if (service.saveWeather(weather)) {
+		
+		com.globant.model.Weather value = new com.globant.model.Weather(); 
+		value.setDate(weather.getDate());
+		value.setId(weather.getId());
+		value.setTemperature(weather.getTemperature());
+		value.setLocation(mapper.writeValueAsString(weather.getLocation()));
+		
+		if (service.saveWeather(value)) {
 			return new ResponseEntity(ACCEPTED,HttpStatus.ACCEPTED);
 		}
 		return new ResponseEntity(NO_FOUND,HttpStatus.NOT_FOUND);
@@ -43,7 +55,7 @@ public class WeatherApi {
 	@GetMapping(value ="/weather") 
 	public ResponseEntity getAllWeathers(@RequestParam(required = false) Date date) {
 		if (date != null) {
-			List<Weather> result = service.getAllWeatherByDate(date);
+			List<com.globant.model.Weather> result = service.getAllWeatherByDate(date);
 			if (result.isEmpty()) {
 				return new ResponseEntity(NO_FOUND,HttpStatus.NOT_FOUND);
 			}

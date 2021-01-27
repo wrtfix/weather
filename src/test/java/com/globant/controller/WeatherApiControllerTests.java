@@ -25,6 +25,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.globant.domain.Location;
 import com.globant.model.Weather;
 
 
@@ -45,22 +46,27 @@ class WeatherApiControllerTests {
 	
 	@Test
 	@Order(1)
-	void saveWhather() throws Exception {
+	void saveweather() throws Exception {
 		
-		Weather whather = new Weather();
-		whather.setId(37892l);
+		com.globant.domain.Weather weather = new com.globant.domain.Weather();
+		weather.setId(37892l);
 		String str="2021-01-27";
 		Date date=Date.valueOf(str);
-		whather.setDate(date);
-		whather.setLocation("Prueba");
+		weather.setDate(date);
+		Location location = new Location();
+		location.setCity("Dallas");
+		location.setState("Texas");
+		location.setLat(2.0223f);
+		location.setLon(2.0223f);
+		weather.setLocation(location);
 		List<Double> temperatures = new ArrayList<Double>(); 
 		temperatures.add(30.0);
 		temperatures.add(2.1);
 		
-		whather.setTemperature(temperatures);
+		weather.setTemperature(temperatures);
 		String response = mockMvc
 				.perform(post("/weather")
-						.content(objectmapper.writeValueAsString(whather)).contentType(MediaType.APPLICATION_JSON))
+						.content(objectmapper.writeValueAsString(weather)).contentType(MediaType.APPLICATION_JSON))
 				.andExpect(status().is(HttpStatus.ACCEPTED.value())).andReturn().getResponse()
 				.getContentAsString();
 		logger.info(response);
@@ -69,7 +75,7 @@ class WeatherApiControllerTests {
 	
 	@Test
 	@Order(2)
-	void getAllWhather() throws Exception {
+	void getAllWeather() throws Exception {
 		
 		String response = mockMvc
 				.perform(get("/weather")
@@ -82,7 +88,7 @@ class WeatherApiControllerTests {
 	
 	@Test
 	@Order(3)
-	void getAllWhatherByDate() throws Exception {
+	void getAllWeatherByDate() throws Exception {
 		String str="2021-01-27";
 		String response = mockMvc
 				.perform(get("/weather?date="+str)
